@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">FinalProject-2</string>
+    <string name="start">Start</string>
+    <string name="started">Started</string>
+    <string name="hi">Hi</string>
+    <string name="next_page">Next_page</string>
+</resources>
