@@ -18,20 +18,15 @@
     </activity>
 
         <activity
-
             android:name=".SecondActivity"
-
-            android:label="Second Activity">
-
+            android:label="Settings">
             <intent-filter>
-
                 <action android:name="com.litreily.SecondActivity"/>
-
                 <category android:name="android.intent.category.DEFAULT"/>
 
             </intent-filter>
 
         </activity>
     </application>
-
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
 </manifest>
