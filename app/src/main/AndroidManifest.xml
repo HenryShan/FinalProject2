@@ -5,7 +5,7 @@
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
+        android:label="SilentAndAutoReply"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
@@ -27,6 +27,26 @@
             </intent-filter>
 
         </activity>
+        <activity
+            android:name=".UserInstruction"
+            android:label="UserInstruction">
+            <intent-filter>
+                <action android:name="com.litreily.UserInstruction"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+
+            </intent-filter>
+
+        </activity>
+        <service
+            android:name=".NotificationMonitor"
+            android:label="NotificationMonitor"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
     </application>
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
+    <uses-permission android:name="android.permission.SEND_SMS"></uses-permission>
+    <uses-permission android:name="android.permission.READ_CONTACTS"></uses-permission>
 </manifest>
