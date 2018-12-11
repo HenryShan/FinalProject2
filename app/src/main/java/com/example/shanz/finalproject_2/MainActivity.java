@@ -1,16 +1,23 @@
 package com.example.shanz.finalproject_2;
 
 import android.Manifest;
+import android.app.NotificationManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
+import android.os.Build;
 import android.service.notification.NotificationListenerService;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.view.View;
 import android.widget.ImageButton;
@@ -26,7 +33,15 @@ import java.util.Set;
 import static android.provider.Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS;
 
 public class MainActivity extends AppCompatActivity {
+    @Override
+    protected void onResume() {
+        if (getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        }
+        super.onResume();
+    }
     Button button;
+    static ImageButton start = null;
     private static int count;
     public static boolean doNotDisturb = false;
     private static File file;
@@ -51,11 +66,15 @@ public class MainActivity extends AppCompatActivity {
         Runnable changeImageRunnable = new Runnable() {
             public void run() {
                 getWindow().setBackgroundDrawableResource(pictures.get(random.nextInt(10)));
-                handler.postDelayed(this, 10000);
+                handler.postDelayed(this, 15000);
             }
         };
-        handler.postDelayed(changeImageRunnable, 10000);
+        handler.postDelayed(changeImageRunnable, 15000);
         setContentView(R.layout.activity_main);
+
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.hide();
+
         button = findViewById(R.id.button1);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -63,12 +82,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        button = findViewById(R.id.button2);
-        button.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                startActivity(new Intent("com.litreily.SecondActivity"));
-            }
-        });
+//        button = findViewById(R.id.button2);
+//        button.setOnClickListener(new View.OnClickListener() {
+//            public void onClick(View v) {
+//                startActivity(new Intent("com.litreily.SecondActivity"));
+//            }
+//        });
         final NotificationListenerService nls = new NotificationMonitor();
         final ImageButton start = findViewById(R.id.startButton);
         start.setOnClickListener(new View.OnClickListener() {
@@ -90,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "Pleas open all permission needed!", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                nls.requestRebind(getComponentName());
+                toggleNotificationListenerService();
                 count++;
                 if (count % 2 != 0) {
                     start.setBackgroundResource(R.drawable.pause);
@@ -120,18 +139,26 @@ public class MainActivity extends AppCompatActivity {
             mode.getStreamVolume(AudioManager.STREAM_RING);
         }
     }
-//    private void getDoNotDisturb(){
-//        NotificationManager notificationManager =
-//                (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
-//
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
-//                && !notificationManager.isNotificationPolicyAccessGranted()) {
-//            Intent intent = new Intent(
-//                    android.provider.Settings
-//                            .ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
-//            startActivity(intent);
-//        }
-//    }
+    private void getDoNotDisturb(){
+        NotificationManager notificationManager =
+                (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        if (!notificationManager.isNotificationPolicyAccessGranted()) {
+            Intent intent = new Intent(
+                    android.provider.Settings
+                            .ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
+            startActivity(intent);
+        }
+    }
+    private void toggleNotificationListenerService() {
+        PackageManager pm = getPackageManager();
+        pm.setComponentEnabledSetting(new ComponentName(this, NotificationMonitor.class),
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+
+        pm.setComponentEnabledSetting(new ComponentName(this, NotificationMonitor.class),
+                PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+
+    }
 //    //this part. Need reference.
 //    private boolean checkDisturbPermission() {
 //        NotificationManager notificationManager =

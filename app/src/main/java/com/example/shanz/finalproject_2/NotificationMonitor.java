@@ -34,7 +34,7 @@ public class NotificationMonitor extends NotificationListenerService {
         if ("com.android.mms".equals(sbn.getPackageName())) {
             Notification notification = sbn.getNotification();
             Bundle extras = notification.extras;
-            String title = "wth";
+            String title = "";
             String content = null;
             if (extras != null) {
                 title = extras.getString(Notification.EXTRA_TITLE, "");
@@ -56,7 +56,6 @@ public class NotificationMonitor extends NotificationListenerService {
                     phoneNumber = title;
                 }
             }
-            Toast.makeText(getApplicationContext(), phoneNumber, Toast.LENGTH_SHORT).show();
            sendSms();
 //            if (phoneNumber != null) {
 //                PendingIntent sentIntent = PendingIntent.getBroadcast(this, 0,

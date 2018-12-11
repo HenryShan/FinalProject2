@@ -6,7 +6,7 @@
     <string name="next_page">Next_page</string>
     <string name="START">START</string>
     <string name="settings">Settings</string>
-    <string name="instruction"><![CDATA[ (・ω・)ノHi ~          I’m your AI helper for blocking all the notifications when you are busy. If some one contacts you through message, I will automatically rely them. You can go to “Settings” to change the default response. Other notifications such as those from SnapChat will be ignored. To work properly, please open up all of the necessary permissions!   Finally, Wish you a happy study life! o(*°▽°*)o  ]]></string>
+    <string name="instruction"><![CDATA[ (・ω・)ノHi ~          I’m your AI helper for blocking all the notifications when you are busy. If some one contacts you through message, I will automatically rely them. Other notifications such as those from SnapChat will be ignored. To work properly, please open up all of the necessary permissions!   Finally, Wish you a happy study life! o(*°▽°*)o  ]]></string>
     <string name="todo" translatable="false">TODO</string>
     <string name="bgc">bgc</string>
     <string name="user_instruction">Instruction</string>

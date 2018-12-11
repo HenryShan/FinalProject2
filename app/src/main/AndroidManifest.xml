@@ -3,13 +3,15 @@
     package="com.example.shanz.finalproject_2">
 
     <application
+        android:screenOrientation="portrait"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="SilentAndAutoReply"
+        android:label="(¦3[▓▓]"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity android:name=".MainActivity"
+            android:screenOrientation="portrait">
         <intent-filter>
             <action android:name="android.intent.action.MAIN" />
 
@@ -17,16 +19,16 @@
         </intent-filter>
     </activity>
 
-        <activity
-            android:name=".SecondActivity"
-            android:label="Settings">
-            <intent-filter>
-                <action android:name="com.litreily.SecondActivity"/>
-                <category android:name="android.intent.category.DEFAULT"/>
+        <!--<activity-->
+            <!--android:name=".SecondActivity"-->
+            <!--android:label="Settings">-->
+            <!--<intent-filter>-->
+                <!--<action android:name="com.litreily.SecondActivity"/>-->
+                <!--<category android:name="android.intent.category.DEFAULT"/>-->
 
-            </intent-filter>
+            <!--</intent-filter>-->
 
-        </activity>
+        <!--</activity>-->
         <activity
             android:name=".UserInstruction"
             android:label="UserInstruction">
