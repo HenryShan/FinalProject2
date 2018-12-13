@@ -7,21 +7,33 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
+import android.nfc.Tag;
 import android.os.Build;
 import android.service.notification.NotificationListenerService;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.telephony.PhoneStateListener;
+import android.telephony.SmsManager;
+import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Toast;
+
+import java.io.FileOutputStream;
 import java.util.List;
 import java.util.ArrayList;
 import android.os.Handler;
@@ -31,6 +43,10 @@ import java.util.Random;
 import java.util.Set;
 
 import static android.provider.Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS;
+import static com.example.shanz.finalproject_2.MainActivity.countTwo;
+import static com.example.shanz.finalproject_2.MainActivity.mcontext;
+import static com.example.shanz.finalproject_2.MainActivity.totalCount;
+import static com.example.shanz.finalproject_2.SecondActivity.toReply;
 
 public class MainActivity extends AppCompatActivity {
     @Override
@@ -41,12 +57,20 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
     }
     Button button;
+    Button settings;
+    public static int totalCount;
+    public static int countTwo;
     static ImageButton start = null;
     private static int count;
     public static boolean doNotDisturb = false;
-    private static File file;
+    protected static File myFile;
     private final static Random random = new Random();
     public static List<Integer> pictures = new ArrayList<>();
+    protected static Context mcontext;
+    public static String fileName = "data";
+    public static FileOutputStream outputStream;
+    public Animation animation;
+    public static TelephonyManager callManager;
     @Override
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,13 +89,19 @@ public class MainActivity extends AppCompatActivity {
         final Handler handler = new Handler();
         Runnable changeImageRunnable = new Runnable() {
             public void run() {
-                getWindow().setBackgroundDrawableResource(pictures.get(random.nextInt(10)));
+                Integer tmp = pictures.get(random.nextInt(10));
+                getWindow().setBackgroundDrawableResource(tmp);
                 handler.postDelayed(this, 15000);
             }
         };
         handler.postDelayed(changeImageRunnable, 15000);
         setContentView(R.layout.activity_main);
-
+        animation = AnimationUtils.loadAnimation(MainActivity.this,
+                R.anim.alpha);
+        if (myFile == null) {
+            myFile = new File(getApplicationContext().getFilesDir(), fileName);
+        }
+        mcontext = getApplicationContext();
         ActionBar actionBar = getSupportActionBar();
         actionBar.hide();
 
@@ -82,13 +112,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-//        button = findViewById(R.id.button2);
-//        button.setOnClickListener(new View.OnClickListener() {
-//            public void onClick(View v) {
-//                startActivity(new Intent("com.litreily.SecondActivity"));
-//            }
-//        });
+        settings = findViewById(R.id.button2);
+        settings.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                startActivity(new Intent("com.litreily.SecondActivity"));
+            }
+        });
         final NotificationListenerService nls = new NotificationMonitor();
+        callManager = (TelephonyManager) getApplicationContext().getSystemService(TELEPHONY_SERVICE);
+        final PhoneCallListener pcl = new PhoneCallListener();
         final ImageButton start = findViewById(R.id.startButton);
         start.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -100,25 +132,30 @@ public class MainActivity extends AppCompatActivity {
                 if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.SEND_SMS}, 1);
                 }
+                if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_PHONE_STATE}, 1);
+                }
                 if (!listeningPermission()) {
                     getNotificationListener();
                 }
                 if (!listeningPermission() || ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED
                         || ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_CONTACTS)
-                        != PackageManager.PERMISSION_GRANTED) {
+                        != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(getApplicationContext(), "Pleas open all permission needed!", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                toggleNotificationListenerService();
                 count++;
                 if (count % 2 != 0) {
+                    rebindNotificationListenerService();
                     start.setBackgroundResource(R.drawable.pause);
                     setToSilent();
                     doNotDisturb = true;
+                    callManager.listen(pcl , PhoneStateListener.LISTEN_CALL_STATE);
                 } else {
                     start.setBackgroundResource(R.drawable.button);
                     setToNormal();
                     doNotDisturb = false;
+                    callManager.listen(pcl, PhoneStateListener.LISTEN_NONE);
                 }
             }
         });
@@ -139,18 +176,18 @@ public class MainActivity extends AppCompatActivity {
             mode.getStreamVolume(AudioManager.STREAM_RING);
         }
     }
-    private void getDoNotDisturb(){
-        NotificationManager notificationManager =
-                (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
-
-        if (!notificationManager.isNotificationPolicyAccessGranted()) {
-            Intent intent = new Intent(
-                    android.provider.Settings
-                            .ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
-            startActivity(intent);
-        }
-    }
-    private void toggleNotificationListenerService() {
+//    private void getDoNotDisturb(){
+//        NotificationManager notificationManager =
+//                (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+//
+//        if (!notificationManager.isNotificationPolicyAccessGranted()) {
+//            Intent intent = new Intent(
+//                    android.provider.Settings
+//                            .ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
+//            startActivity(intent);
+//        }
+//    }
+    private void rebindNotificationListenerService() {
         PackageManager pm = getPackageManager();
         pm.setComponentEnabledSetting(new ComponentName(this, NotificationMonitor.class),
                 PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
@@ -159,7 +196,16 @@ public class MainActivity extends AppCompatActivity {
                 PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
 
     }
-//    //this part. Need reference.
+//    private void rebindCallListener() {
+//        PackageManager pm = getPackageManager();
+//        pm.setComponentEnabledSetting(new ComponentName(this, PhoneStateListener.class),
+//                PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+//
+//        pm.setComponentEnabledSetting(new ComponentName(this, PhoneStateListener.class),
+//                PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+//
+//    }
+//    //this part..
 //    private boolean checkDisturbPermission() {
 //        NotificationManager notificationManager =
 //                (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -183,3 +229,31 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 }
+ class PhoneCallListener extends PhoneStateListener {
+    @Override
+     public void onCallStateChanged(int state, String phoneNumber) {
+        try {
+            switch (state) {
+                case TelephonyManager.CALL_STATE_IDLE:
+                    break;
+                case TelephonyManager.CALL_STATE_RINGING:
+                    sendSms(phoneNumber);
+                    break;
+                case TelephonyManager.CALL_STATE_OFFHOOK:
+                    break;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+     private void sendSms(String phoneNumber) {
+//        String SENT = "SMS_SENT";
+//        PendingIntent sentPI = PendingIntent.getBroadcast(this, 0, new Intent(SENT), 0);
+         SmsManager smsMgr = SmsManager.getDefault();
+         try {
+             smsMgr.sendTextMessage(phoneNumber, null, toReply, null, null);
+         } catch (Exception e) {
+             e.printStackTrace();
+         }
+     }
+ }

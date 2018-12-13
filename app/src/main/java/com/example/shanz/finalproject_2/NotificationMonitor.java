@@ -19,6 +19,10 @@ import static com.example.shanz.finalproject_2.SecondActivity.toReply;
 public class NotificationMonitor extends NotificationListenerService {
     private static int count = 0;
     String phoneNumber = null;
+    @Override
+    public void onListenerConnected() {
+        Toast.makeText(getApplicationContext(), "System Ready!", Toast.LENGTH_SHORT).show();
+    }
 
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {

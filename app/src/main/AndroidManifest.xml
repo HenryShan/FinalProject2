@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.shanz.finalproject_2">
-
     <application
         android:screenOrientation="portrait"
         android:allowBackup="true"
@@ -19,16 +19,16 @@
         </intent-filter>
     </activity>
 
-        <!--<activity-->
-            <!--android:name=".SecondActivity"-->
-            <!--android:label="Settings">-->
-            <!--<intent-filter>-->
-                <!--<action android:name="com.litreily.SecondActivity"/>-->
-                <!--<category android:name="android.intent.category.DEFAULT"/>-->
+        <activity
+            android:name=".SecondActivity"
+            android:label="Settings">
+            <intent-filter>
+                <action android:name="com.litreily.SecondActivity"/>
+                <category android:name="android.intent.category.DEFAULT"/>
 
-            <!--</intent-filter>-->
+            </intent-filter>
 
-        <!--</activity>-->
+        </activity>
         <activity
             android:name=".UserInstruction"
             android:label="UserInstruction">
@@ -51,4 +51,5 @@
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
     <uses-permission android:name="android.permission.SEND_SMS"></uses-permission>
     <uses-permission android:name="android.permission.READ_CONTACTS"></uses-permission>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"></uses-permission>
 </manifest>
