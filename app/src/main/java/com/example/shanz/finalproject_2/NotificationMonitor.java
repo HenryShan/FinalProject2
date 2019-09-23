@@ -45,6 +45,7 @@ public class NotificationMonitor extends NotificationListenerService {
 //                Toast.makeText(getApplicationContext(), title, Toast.LENGTH_SHORT).show();
                 content = extras.getString(Notification.EXTRA_TEXT, "");
             }
+            // ! Cursor part Credit : https://blog.csdn.net/wangjiangjun0815/article/details/56488709.
             Cursor cursor = getApplicationContext().getContentResolver().query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
             while (cursor.moveToNext()) {
                 String contactId = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));

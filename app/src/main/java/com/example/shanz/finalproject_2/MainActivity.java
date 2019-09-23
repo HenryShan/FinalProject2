@@ -96,8 +96,6 @@ public class MainActivity extends AppCompatActivity {
         };
         handler.postDelayed(changeImageRunnable, 15000);
         setContentView(R.layout.activity_main);
-        animation = AnimationUtils.loadAnimation(MainActivity.this,
-                R.anim.alpha);
         if (myFile == null) {
             myFile = new File(getApplicationContext().getFilesDir(), fileName);
         }
@@ -247,8 +245,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
      private void sendSms(String phoneNumber) {
-//        String SENT = "SMS_SENT";
-//        PendingIntent sentPI = PendingIntent.getBroadcast(this, 0, new Intent(SENT), 0);
          SmsManager smsMgr = SmsManager.getDefault();
          try {
              smsMgr.sendTextMessage(phoneNumber, null, toReply, null, null);
